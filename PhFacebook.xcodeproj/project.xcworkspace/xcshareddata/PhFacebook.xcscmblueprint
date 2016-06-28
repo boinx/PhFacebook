@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "876AEB5B982D860C232C878AA685616A1015B7A1",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "BE27A6D8A8D24A155213E5E0BE7FF4D876A5F5E2" : 0,
+    "876AEB5B982D860C232C878AA685616A1015B7A1" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "C8A52FB1-4CF0-4FD5-9285-A4CA7D4467BA",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "BE27A6D8A8D24A155213E5E0BE7FF4D876A5F5E2" : "..\/..",
+    "876AEB5B982D860C232C878AA685616A1015B7A1" : "PhFacebook\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "PhFacebook",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "PhFacebook.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/boinx\/PhFacebook.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "876AEB5B982D860C232C878AA685616A1015B7A1"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "git.assembla.com:boinxtv.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "BE27A6D8A8D24A155213E5E0BE7FF4D876A5F5E2"
+    }
+  ]
+}

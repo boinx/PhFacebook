@@ -11,10 +11,6 @@
 
 @implementation PhAuthenticationToken
 
-@synthesize authenticationToken = _authenticationToken;
-@synthesize expiry = _expiry;
-@synthesize permissions = _permissions;
-
 #pragma mark NSCoding Protocol
 
 - (id)initWithCoder:(NSCoder *)coder
@@ -43,7 +39,9 @@
     {
         self.authenticationToken = token;
         if (seconds != 0)
+		{
             self.expiry = [NSDate dateWithTimeIntervalSinceNow: seconds];
+		}
         self.permissions = perms;
     }
 

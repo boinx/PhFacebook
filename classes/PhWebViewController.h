@@ -13,28 +13,12 @@
 @class PhFacebook;
 
 @interface PhWebViewController : NSViewController <NSWindowDelegate, NSFileManagerDelegate>
-{
-    IBOutlet NSWindow *window;
-    IBOutlet WebView *webView;
-    NSUndoManager *_undoManager;
-    IBOutlet NSProgressIndicator *progressIndicator;
-    id _popover;
-    IBOutlet NSButton *cancelButton;
 
-    PhFacebook *parent;
-    NSString *permissions;
-    
-    // View positioning (only when using NSPopover for login)
-    NSRect _relativeToRect;
-    NSView *_rectParentView;
-}
-
-@property (assign) IBOutlet NSWindow *window;
-@property (assign) IBOutlet WebView *webView;
-@property (assign) IBOutlet NSButton *cancelButton;
-@property (assign) IBOutlet NSProgressIndicator *progressIndicator;
-@property (assign) PhFacebook *parent;
-@property (nonatomic, retain) NSString *permissions;
+@property (weak) IBOutlet WebView *webView;
+@property (weak) IBOutlet NSButton *cancelButton;
+@property (weak) IBOutlet NSProgressIndicator *progressIndicator;
+@property (weak) PhFacebook *parent;
+@property (nonatomic, strong) NSString *permissions;
 
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
 - (instancetype)initWithCoder:(NSCoder *)coder NS_DESIGNATED_INITIALIZER;

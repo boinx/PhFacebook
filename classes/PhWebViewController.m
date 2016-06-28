@@ -9,42 +9,38 @@
 #import "PhWebViewController.h"
 #import "PhFacebook_URLs.h"
 #import "PhFacebook.h"
-#import "Debug.h"
-#import "JSONKit.h"
 
 //#define ALWAYS_SHOW_UI
 
-@interface PhWebViewController ()
+@interface PhWebViewController () <NSPopoverDelegate>
 
-@property (retain) id popover;
+@property (strong) NSPopover *popover;
 
 /**
  Provide a dedicated undo manager for the web view since editing the login field would otherwise propagate
  undo/redo actions to the document's undo manager in document-based apps thus marking the document as edited.
  */
-@property (retain) NSUndoManager *undoManager;
+@property (strong) NSUndoManager *undoManager;
+
+@property (assign) NSRect relativeToRect;
+@property (strong) NSView *rectParentView;
 
 @end
 
 @implementation PhWebViewController
 
-@synthesize window;
-@synthesize webView;
-@synthesize cancelButton;
-@synthesize progressIndicator;
-@synthesize parent;
-@synthesize permissions;
-@synthesize popover=_popover;
-@synthesize undoManager=_undoManager;
 
 // Designated initializer
 //
 - (id) init
 {
-	if (self = [super initWithNibName:[self className] bundle:[NSBundle bundleForClass:[self class]]])
+	self = [super initWithNibName:self.className bundle:[NSBundle bundleForClass:self.class]];
+	
+	if (self)
 	{
-        self.undoManager = [[[NSUndoManager alloc] init] autorelease];
+        self.undoManager = [NSUndoManager new];
 	}
+	
 	return self;
 }
 
@@ -61,22 +57,11 @@
 
 - (void) dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [NSNotificationCenter.defaultCenter removeObserver:self];
     
     self.webView.UIDelegate = nil;
     self.webView.frameLoadDelegate = nil;
     self.webView.editingDelegate = nil;
-    
-    [_undoManager release];
-    
-    if ([self preferPopover]) {
-        [_popover release];
-//        [window release];
-    } else {
-//        [window release];
-    }
-    
-    [super dealloc];
 }
 
 - (void) awakeFromNib
@@ -87,30 +72,15 @@
 
     [self.webView setEditingDelegate:self];     // Need this for providing undo manager for WebView
     
-    if ([self preferPopover])
-    {
-        self.popover = [[[NSPopover alloc] init] autorelease];
-        [self.popover setDelegate:self];
-        [self.popover setContentViewController:self];
-    } else {
-//        [self.window setReleasedWhenClosed:NO];     // behave like NSPopover
-        [self.window setContentView:self.view];
-        self.window.title = [bundle localizedStringForKey: @"FBAuthWindowTitle" value: @"" table: nil];
-        self.window.delegate = self;
-        self.window.level = NSFloatingWindowLevel;
-    }
-}
-
-- (BOOL) preferPopover
-{
-//    return NO;
-    return NSAppKitVersionNumber >= NSAppKitVersionNumber10_7;
+	self.popover = [[NSPopover alloc] init];
+	[self.popover setDelegate:self];
+	[self.popover setContentViewController:self];
 }
 
 - (void) setRelativeToRect:(NSRect)relativeToRect ofView:(NSView *)view
 {
-    _relativeToRect = relativeToRect;
-    _rectParentView = view;
+    self.relativeToRect = relativeToRect;
+    self.rectParentView = view;
     
     // NSPopovers don't play well with NSOutlineView nodes being expanded or collapsed:
     // The NSPopover will stay at the same position.
@@ -140,16 +110,16 @@
     [self cancel:[notification object]];
 }
 
-- (void) popoverWillClose: (NSNotification*) notification
+- (void) popoverWillClose: (NSNotification *)notification
 {
     // Will also release self from PhFacebook object
     
-    [parent performSelector: @selector(didDismissUI)];
+    [self.parent performSelector: @selector(didDismissUI)];
 }
 
 - (void) windowWillClose: (NSNotification*) notification
 {
-    [parent performSelector: @selector(didDismissUI)];
+    [self.parent performSelector: @selector(didDismissUI)];
 }
 
 /**
@@ -166,14 +136,8 @@
 - (void) showUI
 {
     // Facebook needs user input, so show login view
-    
-    // Use NSPopover when possible
-    if ([self preferPopover]) {
-        [self.popover showRelativeToRect:_relativeToRect ofView:_rectParentView preferredEdge:NSMaxYEdge];
-    } else {
-        // Use NSWindow as fallback
-        [self.window makeKeyAndOrderFront: self];
-    }
+	[self.popover showRelativeToRect:self.relativeToRect ofView:self.rectParentView preferredEdge:NSMaxYEdge];
+	
     // Notify parent that we're about to show UI
     [self.parent webViewWillShowUI];
 }
@@ -196,7 +160,7 @@
 - (void) webView: (WebView*) sender didCommitLoadForFrame: (WebFrame*) frame;
 {
     NSString *url = [sender mainFrameURL];
-    DebugLog(@"didCommitLoadForFrame: {%@}", [url stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
+    NSLog(@"didCommitLoadForFrame: {%@}", [url stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
 
     NSString *urlWithoutSchema = [url substringFromIndex: [@"http://" length]];
     if ([url hasPrefix: @"https://"])
@@ -245,7 +209,7 @@
     [self.progressIndicator stopAnimation:self];
 
     NSString *url = [sender mainFrameURL];
-    DebugLog(@"didFinishLoadForFrame: {%@}", [url stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
+    NSLog(@"didFinishLoadForFrame: {%@}", [url stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
 
     NSString *urlWithoutSchema = [url substringFromIndex: [@"http://" length]];
     if ([url hasPrefix: @"https://"])
@@ -264,20 +228,16 @@
                                       errorReason, NSLocalizedDescriptionKey,
                                       nil];
             // For lack of better code picked arbitrary
-            parent.loginError = [NSError errorWithDomain:@"PhFacebookError" code:-1 userInfo:userInfo];
+            self.parent.loginError = [NSError errorWithDomain:@"PhFacebookError" code:-1 userInfo:userInfo];
         }
-        [parent setAccessToken:accessToken expires:[tokenExpires floatValue] permissions:self.permissions];
+        [self.parent setAccessToken:accessToken expires:[tokenExpires floatValue] permissions:self.permissions];
         
-        if ([self preferPopover]) {
-            if ([self.popover isShown]) {
-                [self.popover close];
-            } else {
-                // If popover was not shown we have to manually trigger a notification
-                [self popoverWillClose:nil];
-            }
-        } else {
-            [self.window close];
-        }
+		if ([self.popover isShown]) {
+			[self.popover close];
+		} else {
+			// If popover was not shown we have to manually trigger a notification
+			[self popoverWillClose:[NSNotification notificationWithName:@"" object:nil]];
+		}
     }
     else
     {
@@ -287,12 +247,9 @@
         WebDataSource *dataSource = [[sender mainFrame] dataSource];
         if ([[[dataSource response] MIMEType] isEqualToString:@"application/json"]) {
             NSDictionary *responseDict = nil;
-            if (NSAppKitVersionNumber >= NSAppKitVersionNumber10_7) {
-                responseDict = (NSDictionary *) [NSJSONSerialization JSONObjectWithData:[dataSource data] options:0 error:nil];
-            } else {
-                responseDict = (NSDictionary *) [[JSONDecoder decoder] objectWithData:[dataSource data] error:nil];
-            }
-            NSLog(@"Error when loading Facebook page: %@", responseDict);
+			responseDict = (NSDictionary *) [NSJSONSerialization JSONObjectWithData:[dataSource data] options:0 error:nil];
+
+			NSLog(@"Error when loading Facebook page: %@", responseDict);
             [self showError:[self errorFromFacebookError:[responseDict valueForKey:@"error"]]];
         } else {
             [self showUI];
@@ -307,11 +264,7 @@
 
 - (IBAction) cancel: (id) sender
 {
-    if ([self preferPopover]) {
-        [self.popover close];
-    } else {
-        [self.window close];
-    }
+	[self.popover close];
 }
 
 #pragma mark WebUIDelegate
@@ -329,11 +282,7 @@
 //
 -(void)webViewClose:(WebView *)sender
 {
-    if ([self preferPopover]) {
-        [self.popover close];
-    } else {
-        [self.window close];
-    }
+	[self.popover close];
 }
 
 #pragma mark WebEditingDelegate

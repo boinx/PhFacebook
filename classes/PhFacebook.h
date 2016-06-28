@@ -15,22 +15,12 @@
 typedef void (^PhTokenRequestCompletionHandler)(NSDictionary *result);
 
 @interface PhFacebook : NSObject <NSCoding>
-{
-@private
-    NSString *_appID;
-    id _delegate;
-    PhWebViewController *_webViewController;
-    PhAuthenticationToken *_authToken;
-    NSString *_permissions;
-    PhTokenRequestCompletionHandler _tokenRequestCompletionHandler;
-    NSError *_loginError;
-}
 
 // The Completion handler to be invoked when web view will be closed
 @property (copy) PhTokenRequestCompletionHandler tokenRequestCompletionHandler;
 
 // Any error that has been encountered attempting to login
-@property (retain) NSError *loginError;
+@property (strong) NSError *loginError;
 
 - (id) initWithApplicationID: (NSString*) appID delegate: (id) delegate;
 

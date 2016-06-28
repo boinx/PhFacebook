@@ -10,13 +10,21 @@
 #import "PhWebViewController.h"
 #import "PhAuthenticationToken.h"
 #import "PhFacebook_URLs.h"
-#import "Debug.h"
 #import "WebView+PhFacebook.h"
-#import "JSONKit.h"
 
 #define kFBStoreAccessToken @"FBAStoreccessToken"
 #define kFBStoreTokenExpiry @"FBStoreTokenExpiry"
 #define kFBStoreAccessPermissions @"FBStoreAccessPermissions"
+
+@interface PhFacebook ()
+
+@property (atomic, strong) NSString *appID;
+@property (atomic, weak) id delegate;
+@property (atomic, strong) PhWebViewController *webViewController;
+@property (atomic, strong) PhAuthenticationToken *authToken;
+@property (atomic, strong) NSString *permissions;
+
+@end
 
 @implementation PhFacebook
 
@@ -28,16 +36,16 @@
 {
     self = [super init];
     if (self) {
-        _appID = [[coder decodeObjectForKey:@"appID"] retain];
-        _authToken = [[coder decodeObjectForKey:@"authToken"] retain];
+        self.appID = [coder decodeObjectForKey:@"appID"];
+        self.authToken = [coder decodeObjectForKey:@"authToken"];
     }
     return self;
 }
 
 - (void) encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_appID forKey:@"appID"];
-    [coder encodeObject:_authToken forKey:@"authToken"];
+    [coder encodeObject:self.appID forKey:@"appID"];
+    [coder encodeObject:self.authToken forKey:@"authToken"];
 }
 
 #pragma mark Initialization
@@ -54,33 +62,34 @@
     if ((self = [super init]))
     {
         if (appID)
-            _appID = [[NSString stringWithString: appID] retain];
-        _delegate = delegate; // Don't retain delegate to avoid retain cycles
-        _webViewController = nil;
-        _authToken = nil;
-        _permissions = nil;
-        DebugLog(@"Initialized with AppID '%@'", _appID);
+		{
+            self.appID = [NSString stringWithString: appID];
+		}
+        self.delegate = delegate; // Don't retain delegate to avoid retain cycles
+        self.webViewController = nil;
+        self.authToken = nil;
+        self.permissions = nil;
+		
+        NSLog(@"Initialized with AppID '%@'", self.appID);
     }
 
     return self;
 }
 
-- (void) dealloc
-{
-    [_appID release];
-    [_webViewController release];
-    [_authToken release];
-    [super dealloc];
-}
 
 - (void) saveTokenToUserDefaults:(PhAuthenticationToken *)token
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject: token.authenticationToken forKey: kFBStoreAccessToken];
+	
     if (token.expiry)
+	{
         [defaults setObject: token.expiry forKey: kFBStoreTokenExpiry];
+	}
     else
+	{
         [defaults removeObjectForKey: kFBStoreTokenExpiry];
+	}
     [defaults setObject: token.permissions forKey: kFBStoreAccessPermissions];
 }
 
@@ -105,19 +114,8 @@
 
 #pragma mark Access
 
-- (id) delegate
-{
-    return [[_delegate retain] autorelease];
-}
-
-- (void) setDelegate:(id)delegate
-{
-    _delegate = delegate;    // Weak reference
-}
-
 - (void) clearToken
 {
-    [_authToken release];
     _authToken = nil;
 }
 
@@ -137,7 +135,9 @@
     NSArray *cookies = [[cookieStorage cookiesForURL: facebookUrl] arrayByAddingObjectsFromArray:[cookieStorage cookiesForURL: facebookSecureUrl]];
 
     for (NSHTTPCookie *cookie in cookies)
+	{
         [cookieStorage deleteCookie: cookie];
+	}
 }
 
 - (void) setAccessToken: (NSString*) accessToken expires: (NSTimeInterval) tokenExpires permissions: (NSString*) perms
@@ -146,10 +146,10 @@
 
     if (accessToken)
     {
-        _authToken = [[PhAuthenticationToken alloc] initWithToken: accessToken
+        self.authToken = [[PhAuthenticationToken alloc] initWithToken: accessToken
                                                   secondsToExpiry: tokenExpires
                                                       permissions: perms];
-        [self saveTokenToUserDefaults:_authToken];
+        [self saveTokenToUserDefaults:self.authToken];
     }
 }
 
@@ -165,7 +165,7 @@
     BOOL validToken = NO;
     NSString *scope = [permissions componentsJoinedByString: @","];
 
-    if (canCache && _authToken == nil)
+    if (canCache && self.authToken == nil)
     {
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         NSString *accessToken = [defaults stringForKey: kFBStoreAccessToken];
@@ -178,17 +178,17 @@
         }
     }
 
-    if ([_authToken.permissions isCaseInsensitiveLike: scope])
+    if ([self.authToken.permissions isCaseInsensitiveLike: scope])
     {
         // We already have a token for these permissions; check if it has expired or not
-        if (_authToken.expiry == nil || [[_authToken.expiry laterDate: [NSDate date]] isEqual: _authToken.expiry])
+        if (self.authToken.expiry == nil || [[self.authToken.expiry laterDate: [NSDate date]] isEqual: _authToken.expiry])
             validToken = YES;
     }
 
     if (validToken)
     {
         if (completion) {
-            completion([self authenticationResultFromToken:_authToken error:nil]);
+            completion([self authenticationResultFromToken:self.authToken error:nil]);
         }
     }
     else
@@ -198,13 +198,13 @@
         // Use _webViewController to request a new token
         NSString *authURL;
         if (scope)
-            authURL = [NSString stringWithFormat: kFBAuthorizeWithScopeURL, _appID, kFBLoginSuccessURL, scope];
+            authURL = [NSString stringWithFormat: kFBAuthorizeWithScopeURL, self.appID, kFBLoginSuccessURL, scope];
         else
-            authURL = [NSString stringWithFormat: kFBAuthorizeURL, _appID, kFBLoginSuccessURL];
+            authURL = [NSString stringWithFormat: kFBAuthorizeURL, self.appID, kFBLoginSuccessURL];
       
-        if ([_delegate respondsToSelector: @selector(needsAuthentication:forPermissions:)]) 
+        if ([self.delegate respondsToSelector: @selector(needsAuthentication:forPermissions:)])
         {
-            if ([_delegate needsAuthentication: authURL forPermissions: scope]) 
+            if ([self.delegate needsAuthentication: authURL forPermissions: scope])
             {
                 // If needsAuthentication returns YES, let the delegate handle the authentication UI
                 return;
@@ -212,24 +212,24 @@
         }
       
         // Retrieve token from web page
-        if (_webViewController == nil)
+        if (self.webViewController == nil)
         {
-            _webViewController = [[PhWebViewController alloc] init];
-            [_webViewController loadView];
+            self.webViewController = [PhWebViewController new];
+            [self.webViewController loadView];
         }
 
         // Prepare window but keep it ordered out. The _webViewController will make it visible
         // if it needs to.
-        _webViewController.parent = self;
-        _webViewController.permissions = scope;
-        WebView *webView = _webViewController.webView;
+        self.webViewController.parent = self;
+        self.webViewController.permissions = scope;
+        WebView *webView = self.webViewController.webView;
         
         // Need to fake Safari-like user agent because otherwise auth token will be missing on request
         // when cookies are deleted
         [webView poseAsSafari];
         
         // When using NSPopover for login need positioning parameters
-        [_webViewController setRelativeToRect:rect ofView:view];
+        [self.webViewController setRelativeToRect:rect ofView:view];
         
         [webView setMainFrameURL: authURL];
     }
@@ -240,12 +240,11 @@
 //
 - (void) completeTokenRequestWithError:(NSError *)error
 {
-    [_webViewController release];
-    _webViewController = nil;
+    self.webViewController = nil;
     
     if (self.tokenRequestCompletionHandler)
     {
-        self.tokenRequestCompletionHandler([self authenticationResultFromToken:_authToken error:error]);
+        self.tokenRequestCompletionHandler([self authenticationResultFromToken:self.authToken error:error]);
         
         // Do not reuse completion handler nor error
         self.tokenRequestCompletionHandler = nil;
@@ -255,7 +254,7 @@
 
 - (NSString*) accessToken
 {
-    return [[_authToken.authenticationToken copy] autorelease];
+    return self.authToken.authenticationToken;
 }
 
 - (NSDictionary*) resultFromRequest:(NSString *)request data:(NSData *)data
@@ -271,12 +270,7 @@
                                                freeWhenDone: NO];
         
         // Structured data returned from Facebook
-        
-        if (NSAppKitVersionNumber >= NSAppKitVersionNumber10_7) {
-            responseDict = (NSDictionary *) [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-        } else {
-            responseDict = (NSDictionary *) [[JSONDecoder decoder] objectWithData:data error:nil];
-        }
+        responseDict = (NSDictionary *) [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         
         // May contain a Facebook error
         facebookError = [responseDict valueForKey:@"error"];
@@ -300,7 +294,6 @@
                   responseDict, @"resultDict",
                   nil];
     }
-    [responseStr release];
     return result;
 }
 
@@ -308,7 +301,7 @@
 {
     NSDictionary *result = nil;
     
-    if (_authToken)
+    if (self.authToken)
     {
         //        NSAutoreleasePool *pool = [NSAutoreleasePool new];
         
@@ -339,7 +332,7 @@
             NSRange rng = [request rangeOfString:@"?"];
             if (rng.length > 0)
                 formatStr = kFBGraphApiGetURLWithParams;
-            str = [NSString stringWithFormat: formatStr, request, _authToken.authenticationToken];
+            str = [NSString stringWithFormat: formatStr, request, self.authToken.authenticationToken];
         }
         
         
@@ -349,7 +342,7 @@
         {
             if (postRequest)
             {
-                strPostParams = [NSMutableString stringWithFormat: @"access_token=%@", _authToken.authenticationToken];
+                strPostParams = [NSMutableString stringWithFormat: @"access_token=%@", self.authToken.authenticationToken];
                 for (NSString *p in [params allKeys])
                     [strPostParams appendFormat: @"&%@=%@", p, [params objectForKey: p]];
             }
@@ -375,7 +368,7 @@
         NSURLResponse *response = nil;
         NSError *error = nil;
         
-        DebugLog(@"Sending %@ request: %@", requestMethod, req.URL);
+        NSLog(@"Sending %@ request: %@", requestMethod, req.URL);
         
         NSData *data = [NSURLConnection sendSynchronousRequest: req returningResponse: &response error: &error];
         
@@ -388,10 +381,10 @@
 
 - (void) sendFacebookRequest:(NSDictionary *)allParams
 {
-    if ([_delegate respondsToSelector:@selector(requestResult:)])
+    if ([self.delegate respondsToSelector:@selector(requestResult:)])
     {
         NSDictionary *result = [self _doRequest:allParams];
-        [_delegate performSelectorOnMainThread:@selector(requestResult:) withObject: result waitUntilDone:YES];
+        [self.delegate performSelectorOnMainThread:@selector(requestResult:) withObject: result waitUntilDone:YES];
     }
 }
 
@@ -442,9 +435,9 @@
 {
     NSDictionary *result = nil;
     
-    if (_authToken)
+    if (self.authToken)
     {
-        NSString *str = [NSString stringWithFormat: kFBGraphApiFqlURL, [query stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], _authToken.authenticationToken];
+        NSString *str = [NSString stringWithFormat: kFBGraphApiFqlURL, [query stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.authToken.authenticationToken];
         
         NSLog(@"FQL query request: %@", str);
         
@@ -463,33 +456,32 @@
 
 - (void) sendFacebookFQLRequest: (NSString*) query
 {
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    @autoreleasepool {
 
-    if (_authToken)
-    {
-        NSString *str = [NSString stringWithFormat: kFBGraphApiFqlURL, [query stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], _authToken.authenticationToken];
-
-        NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: str]];
-
-        NSURLResponse *response = nil;
-        NSError *error = nil;
-        NSData *data = [NSURLConnection sendSynchronousRequest: req returningResponse: &response error: &error];
-
-        if ([_delegate respondsToSelector: @selector(requestResult:)])
+        if (self.authToken)
         {
-            NSString *str = [[NSString alloc] initWithBytesNoCopy: (void*)[data bytes] length: [data length] encoding:NSASCIIStringEncoding freeWhenDone: NO];
+            NSString *str = [NSString stringWithFormat: kFBGraphApiFqlURL, [query stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], self.authToken.authenticationToken];
 
-            NSDictionary *result = [NSDictionary dictionaryWithObjectsAndKeys:
-                                    str, @"result",
-                                    query, @"request",
-                                    data, @"raw",
-                                    self, @"sender",
-                                    nil];
-            [_delegate performSelectorOnMainThread:@selector(requestResult:) withObject: result waitUntilDone:YES];
-            [str release];
+            NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL: [NSURL URLWithString: str]];
+
+            NSURLResponse *response = nil;
+            NSError *error = nil;
+            NSData *data = [NSURLConnection sendSynchronousRequest: req returningResponse: &response error: &error];
+
+            if ([self.delegate respondsToSelector: @selector(requestResult:)])
+            {
+                NSString *str = [[NSString alloc] initWithBytesNoCopy: (void*)[data bytes] length: [data length] encoding:NSASCIIStringEncoding freeWhenDone: NO];
+
+                NSDictionary *result = [NSDictionary dictionaryWithObjectsAndKeys:
+                                        str, @"result",
+                                        query, @"request",
+                                        data, @"raw",
+                                        self, @"sender",
+                                        nil];
+                [self.delegate performSelectorOnMainThread:@selector(requestResult:) withObject: result waitUntilDone:YES];
+            }
         }
     }
-    [pool drain];
 }
 
 - (void) sendFQLRequest: (NSString*) query
@@ -502,16 +494,20 @@
 
 - (void) webViewWillShowUI
 {
-    if ([_delegate respondsToSelector: @selector(willShowUINotification:)])
-        [_delegate performSelectorOnMainThread: @selector(willShowUINotification:) withObject: self waitUntilDone: YES];
+    if ([self.delegate respondsToSelector: @selector(willShowUINotification:)])
+	{
+        [self.delegate performSelectorOnMainThread: @selector(willShowUINotification:) withObject: self waitUntilDone: YES];
+	}
 }
 
 - (void) didDismissUI
 {
     [self completeTokenRequestWithError:self.loginError];
     
-    if ([_delegate respondsToSelector: @selector(didDismissUI:)])
-        [_delegate performSelectorOnMainThread: @selector(didDismissUI:) withObject: self waitUntilDone: YES];
+    if ([self.delegate respondsToSelector: @selector(didDismissUI:)])
+	{
+        [self.delegate performSelectorOnMainThread: @selector(didDismissUI:) withObject: self waitUntilDone: YES];
+	}
 }
 
 @end
