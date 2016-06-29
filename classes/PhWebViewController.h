@@ -7,22 +7,14 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import <WebKit/WebKit.h>
 
+@class PhAuthenticationToken;
 
-@class PhFacebook;
+typedef void (^PhTokenRequestCompletionHandler)(PhAuthenticationToken *token, NSError *error);
 
-@interface PhWebViewController : NSViewController <NSWindowDelegate, NSFileManagerDelegate>
+@interface PhWebViewController : NSViewController
 
-@property (weak) IBOutlet WebView *webView;
-@property (weak) IBOutlet NSButton *cancelButton;
-@property (weak) IBOutlet NSProgressIndicator *progressIndicator;
-@property (weak) PhFacebook *parent;
-@property (nonatomic, strong) NSString *permissions;
-
-- (instancetype)init NS_DESIGNATED_INITIALIZER;
-- (instancetype)initWithCoder:(NSCoder *)coder NS_DESIGNATED_INITIALIZER;
-- (void) setRelativeToRect:(NSRect)relativeToRect ofView:(NSView *)view;
-- (IBAction) cancel: (id) sender;
+- (id)initWithApplicationIdentifier:(NSString *)appID permissions:(NSString *)permissions;
+- (void)showFromView:(NSView *)view completionHandler:(PhTokenRequestCompletionHandler)completion;
 
 @end

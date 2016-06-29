@@ -8,33 +8,40 @@
 
 #import <Foundation/Foundation.h>
 
-@class PhWebViewController;
 @class PhAuthenticationToken;
 
-// Block parameter must match -facebook:tokenResult: last parameter
-typedef void (^PhTokenRequestCompletionHandler)(NSDictionary *result);
+/*!
+ * @name PhTokenRequestCompletionHandler
+ * @discussion Block invoked upon receiving a valid authentication token or an error that occured during login
+ * @param token:	If successfull contains the facebook authentication token, nil otherwise
+ * @param error:	Any error that occured during acquiring of the authentication token
+ */
 
-@interface PhFacebook : NSObject <NSCoding>
+typedef void (^PhTokenRequestCompletionHandler)(PhAuthenticationToken *token, NSError *error);
 
-// The Completion handler to be invoked when web view will be closed
-@property (copy) PhTokenRequestCompletionHandler tokenRequestCompletionHandler;
 
-// Any error that has been encountered attempting to login
-@property (strong) NSError *loginError;
+@interface PhFacebook : NSObject
 
-- (id) initWithApplicationID: (NSString*) appID delegate: (id) delegate;
+/*! 
+ * @discussion You get the \c appID parameter from the facebook developer homepage: https://developers.facebook.com/apps/
+ * @param appID: facebook application identifier
+ * @param token: if available a restored authentication (will be cached in memory and used if not expired)
+ */
+- (id)initWithApplicationID:(NSString *)appID existingToken:(PhAuthenticationToken *)token NS_DESIGNATED_INITIALIZER;
 
-// permissions: an array of required permissions
-//              see http://developers.facebook.com/docs/authentication/permissions
-// canCache: save and retrieve token locally if not expired
-- (void) getAccessTokenForPermissions:(NSArray *)permissions
-                               cached:(BOOL)canCache
-                       relativeToRect:(NSRect)rect
-                               ofView:(NSView *)view
-                           completion:(PhTokenRequestCompletionHandler)completion;
+/*!
+ * @discussion Use this method to load a token from facebook (e. g. login and request permissions)
+ * @param permissions:	an array of required permissions, see: https://developers.facebook.com/docs/authentication/permissions
+ * @param view:			view from which to open the popup
+ * @param completion:	block invoked when either a token is available or an error occured
+ */
+- (void)getAccessTokenForPermissions:(NSArray *)permissions
+						   fromView:(NSView *)host
+						  completion:(PhTokenRequestCompletionHandler)completion;
 
-- (void) setAccessToken: (NSString*) accessToken expires: (NSTimeInterval) tokenExpires permissions: (NSString*) perms;
-
+/*
+ * STILL NEEDS TO BE DONE
+ */
 // request: the short version of the Facebook Graph API, e.g. "me/feed"
 // see http://developers.facebook.com/docs/api
 - (void) sendRequest: (NSString*) request;
@@ -55,30 +62,6 @@ typedef void (^PhTokenRequestCompletionHandler)(NSDictionary *result);
  */
 - (NSDictionary *)sendSynchronousFQLRequest:(NSString *)query;
 
-- (void) invalidateCachedToken;
 
-- (id) delegate;
-- (void) setDelegate:(id)delegate;
-
-// To be called when web view is done (either with or without having successfully logged in).
-// Will call completion handler that was provided earlier
-- (void) completeTokenRequestWithError:(NSError *)error;
-- (NSString*) accessToken;
-
-- (void) webViewWillShowUI;
-- (void) didDismissUI;
 @end
 
-@protocol PhFacebookDelegate
-
-@required
-- (void) requestResult: (NSDictionary*) result;
-
-@optional
-// needsAuthentication is called before showing the authentication WebView.
-// If it returns YES, the default login window will not be shown and
-// your application is responsible for the authentication UI.
-- (BOOL) needsAuthentication: (NSString*) authenticationURL forPermissions: (NSString*) permissions; 
-- (void) willShowUINotification: (PhFacebook*) sender;
-- (void) didDismissUI: (PhFacebook*) sender;
-@end

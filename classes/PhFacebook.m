@@ -10,11 +10,6 @@
 #import "PhWebViewController.h"
 #import "PhAuthenticationToken.h"
 #import "PhFacebook_URLs.h"
-#import "WebView+PhFacebook.h"
-
-#define kFBStoreAccessToken @"FBAStoreccessToken"
-#define kFBStoreTokenExpiry @"FBStoreTokenExpiry"
-#define kFBStoreAccessPermissions @"FBStoreAccessPermissions"
 
 @interface PhFacebook ()
 
@@ -28,233 +23,59 @@
 
 @implementation PhFacebook
 
-@synthesize tokenRequestCompletionHandler=_tokenRequestCompletionHandler, loginError=_loginError;
-
-#pragma mark NSCoding Protocol
-
-- (id)initWithCoder:(NSCoder *)coder
-{
-    self = [super init];
-    if (self) {
-        self.appID = [coder decodeObjectForKey:@"appID"];
-        self.authToken = [coder decodeObjectForKey:@"authToken"];
-    }
-    return self;
-}
-
-- (void) encodeWithCoder:(NSCoder *)coder
-{
-    [coder encodeObject:self.appID forKey:@"appID"];
-    [coder encodeObject:self.authToken forKey:@"authToken"];
-}
-
 #pragma mark Initialization
 
-// Designated initializer for completion block based authorization
-//
-- (id) initWithApplicationID:(NSString *)appID
+- (id)initWithApplicationID:(NSString *)appID existingToken:(PhAuthenticationToken *)token 
 {
-	return [self initWithApplicationID:appID delegate:nil];
-}
-
-- (id) initWithApplicationID: (NSString*) appID delegate: (id) delegate
-{
-    if ((self = [super init]))
-    {
-        if (appID)
-		{
-            self.appID = [NSString stringWithString: appID];
-		}
-        self.delegate = delegate; // Don't retain delegate to avoid retain cycles
-        self.webViewController = nil;
-        self.authToken = nil;
-        self.permissions = nil;
-		
-        NSLog(@"Initialized with AppID '%@'", self.appID);
-    }
-
-    return self;
-}
-
-
-- (void) saveTokenToUserDefaults:(PhAuthenticationToken *)token
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject: token.authenticationToken forKey: kFBStoreAccessToken];
+	self = [super init];
+	if (self)
+	{
+		self.appID = appID;
+		self.authToken = token;
+		self.webViewController = nil;
+		self.authToken = nil;
+		self.permissions = nil;
+	}
 	
-    if (token.expiry)
-	{
-        [defaults setObject: token.expiry forKey: kFBStoreTokenExpiry];
-	}
-    else
-	{
-        [defaults removeObjectForKey: kFBStoreTokenExpiry];
-	}
-    [defaults setObject: token.permissions forKey: kFBStoreAccessPermissions];
-}
-
-- (NSDictionary *)authenticationResultFromToken:(PhAuthenticationToken *)token error:(NSError *)error
-{
-    NSMutableDictionary *result = [NSMutableDictionary dictionary];
-    if (token)
-    {
-        [result setObject: [NSNumber numberWithBool: YES] forKey: @"valid"];
-    }
-    else
-    {
-        [result setObject: [NSNumber numberWithBool: NO] forKey: @"valid"];
-        
-        // If the user hit cancel there will be no error
-        if (error) {
-            [result setObject: error forKey: @"error"];
-        }
-    }
-    return result;
+	return self;
 }
 
 #pragma mark Access
 
 - (void) clearToken
 {
-    _authToken = nil;
+    self.authToken = nil;
 }
 
--(void) invalidateCachedToken
+- (void)getAccessTokenForPermissions:(NSArray *)permissions
+						   fromView:(NSView *)host
+						  completion:(PhTokenRequestCompletionHandler)completion
 {
-    [self clearToken];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults removeObjectForKey:kFBStoreAccessToken];
-    [defaults removeObjectForKey: kFBStoreTokenExpiry];
-    [defaults removeObjectForKey: kFBStoreAccessPermissions];
-
-    // Allow logout by clearing the left-over cookies (issue #35)
-    NSURL *facebookUrl = [NSURL URLWithString:kFBURL];
-    NSURL *facebookSecureUrl = [NSURL URLWithString:kFBSecureURL];
-
-    NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-    NSArray *cookies = [[cookieStorage cookiesForURL: facebookUrl] arrayByAddingObjectsFromArray:[cookieStorage cookiesForURL: facebookSecureUrl]];
-
-    for (NSHTTPCookie *cookie in cookies)
+	NSString *scope = [permissions componentsJoinedByString: @","];
+	
+	if ([self.authToken.permissions isCaseInsensitiveLike: scope])
 	{
-        [cookieStorage deleteCookie: cookie];
+		// We already have a token for these permissions; check if it has expired or not
+		if (self.authToken.expiry == nil || [[self.authToken.expiry laterDate:NSDate.date] isEqual:self.authToken.expiry])
+		{
+			completion(self.authToken, nil);
+			return;
+		}
 	}
-}
-
-- (void) setAccessToken: (NSString*) accessToken expires: (NSTimeInterval) tokenExpires permissions: (NSString*) perms
-{
-    [self clearToken];
-
-    if (accessToken)
-    {
-        self.authToken = [[PhAuthenticationToken alloc] initWithToken: accessToken
-                                                  secondsToExpiry: tokenExpires
-                                                      permissions: perms];
-        [self saveTokenToUserDefaults:self.authToken];
-    }
-}
-
-- (void) getAccessTokenForPermissions:(NSArray *)permissions
-                               cached:(BOOL)canCache
-                       relativeToRect:(NSRect)rect
-                               ofView:(NSView *)view
-                           completion:(PhTokenRequestCompletionHandler)completion
-{
-    // Must save completion handler because web view is delegate callback based and thus does not offer
-    // another way to call completion handler when authentication success URL has been loaded
-    self.tokenRequestCompletionHandler = completion;
-    BOOL validToken = NO;
-    NSString *scope = [permissions componentsJoinedByString: @","];
-
-    if (canCache && self.authToken == nil)
-    {
-        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        NSString *accessToken = [defaults stringForKey: kFBStoreAccessToken];
-        NSDate *date = [defaults objectForKey: kFBStoreTokenExpiry];
-        NSString *perms = [defaults stringForKey: kFBStoreAccessPermissions];
-        if (accessToken && perms)
-        {
-            // Do not notify delegate yet...
-            [self setAccessToken: accessToken expires: [date timeIntervalSinceNow] permissions: perms];
-        }
-    }
-
-    if ([self.authToken.permissions isCaseInsensitiveLike: scope])
-    {
-        // We already have a token for these permissions; check if it has expired or not
-        if (self.authToken.expiry == nil || [[self.authToken.expiry laterDate: [NSDate date]] isEqual: _authToken.expiry])
-            validToken = YES;
-    }
-
-    if (validToken)
-    {
-        if (completion) {
-            completion([self authenticationResultFromToken:self.authToken error:nil]);
-        }
-    }
-    else
-    {
-        [self clearToken];
-
-        // Use _webViewController to request a new token
-        NSString *authURL;
-        if (scope)
-            authURL = [NSString stringWithFormat: kFBAuthorizeWithScopeURL, self.appID, kFBLoginSuccessURL, scope];
-        else
-            authURL = [NSString stringWithFormat: kFBAuthorizeURL, self.appID, kFBLoginSuccessURL];
-      
-        if ([self.delegate respondsToSelector: @selector(needsAuthentication:forPermissions:)])
-        {
-            if ([self.delegate needsAuthentication: authURL forPermissions: scope])
-            {
-                // If needsAuthentication returns YES, let the delegate handle the authentication UI
-                return;
-            }
-        }
-      
-        // Retrieve token from web page
-        if (self.webViewController == nil)
-        {
-            self.webViewController = [PhWebViewController new];
-            [self.webViewController loadView];
-        }
-
-        // Prepare window but keep it ordered out. The _webViewController will make it visible
-        // if it needs to.
-        self.webViewController.parent = self;
-        self.webViewController.permissions = scope;
-        WebView *webView = self.webViewController.webView;
-        
-        // Need to fake Safari-like user agent because otherwise auth token will be missing on request
-        // when cookies are deleted
-        [webView poseAsSafari];
-        
-        // When using NSPopover for login need positioning parameters
-        [self.webViewController setRelativeToRect:rect ofView:view];
-        
-        [webView setMainFrameURL: authURL];
-    }
-}
-
-// To be called when web view is done (either with or without having successfully logged in).
-// Will call completion handler that was provided earlier
-//
-- (void) completeTokenRequestWithError:(NSError *)error
-{
-    self.webViewController = nil;
-    
-    if (self.tokenRequestCompletionHandler)
-    {
-        self.tokenRequestCompletionHandler([self authenticationResultFromToken:self.authToken error:error]);
-        
-        // Do not reuse completion handler nor error
-        self.tokenRequestCompletionHandler = nil;
-        self.loginError = nil;
-    }
-}
-
-- (NSString*) accessToken
-{
-    return self.authToken.authenticationToken;
+	
+	[self clearToken];
+	
+	// Retrieve token from web page
+	if (self.webViewController == nil)
+	{
+		self.webViewController = [[PhWebViewController alloc] initWithApplicationIdentifier:self.appID permissions:scope];
+		[self.webViewController loadView];
+	}
+	
+	[self.webViewController showFromView:host completionHandler:^(PhAuthenticationToken *token, NSError *error) {
+		self.authToken = token;
+		completion(token, error);
+	}];
 }
 
 - (NSDictionary*) resultFromRequest:(NSString *)request data:(NSData *)data
@@ -489,25 +310,5 @@
     [NSThread detachNewThreadSelector: @selector(sendFacebookFQLRequest:) toTarget: self withObject: query];
 }
 
-
-#pragma mark Notifications
-
-- (void) webViewWillShowUI
-{
-    if ([self.delegate respondsToSelector: @selector(willShowUINotification:)])
-	{
-        [self.delegate performSelectorOnMainThread: @selector(willShowUINotification:) withObject: self waitUntilDone: YES];
-	}
-}
-
-- (void) didDismissUI
-{
-    [self completeTokenRequestWithError:self.loginError];
-    
-    if ([self.delegate respondsToSelector: @selector(didDismissUI:)])
-	{
-        [self.delegate performSelectorOnMainThread: @selector(didDismissUI:) withObject: self waitUntilDone: YES];
-	}
-}
 
 @end
