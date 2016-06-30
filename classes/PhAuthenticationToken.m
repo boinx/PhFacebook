@@ -8,6 +8,13 @@
 
 #import "PhAuthenticationToken.h"
 
+@interface PhAuthenticationToken ()
+
+@property (nonatomic, strong, readwrite) NSString *authenticationToken;
+@property (nonatomic, strong, readwrite) NSDate *expiry;
+@property (nonatomic, strong, readwrite) NSString *permissions;
+
+@end
 
 @implementation PhAuthenticationToken
 

@@ -7,14 +7,14 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "PhFacebook.h"
 
 @class PhAuthenticationToken;
 
-typedef void (^PhTokenRequestCompletionHandler)(PhAuthenticationToken *token, NSError *error);
-
 @interface PhWebViewController : NSViewController
 
-- (id)initWithApplicationIdentifier:(NSString *)appID permissions:(NSString *)permissions;
+- (id)initWithApplicationID:(NSString *)appID permissions:(NSString *)permissions;
+
 - (void)showFromView:(NSView *)view completionHandler:(PhTokenRequestCompletionHandler)completion;
 
 @end

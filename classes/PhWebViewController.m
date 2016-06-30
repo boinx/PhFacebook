@@ -15,9 +15,7 @@
 
 @interface PhWebViewController () <NSPopoverDelegate, WKNavigationDelegate>
 
-@property (weak) IBOutlet WKWebView *webView;
-@property (weak) IBOutlet NSProgressIndicator *progressIndicator;
-
+@property (strong) WKWebView *webView;
 @property (strong) NSPopover *popover;
 
 @property (strong) NSString *appID;
@@ -30,7 +28,7 @@
 
 @implementation PhWebViewController
 
-- (id)initWithApplicationIdentifier:(NSString *)appID permissions:(NSString *)permissions
+- (id)initWithApplicationID:(NSString *)appID permissions:(NSString *)permissions
 {
 	self = [super initWithNibName:self.className bundle:[NSBundle bundleForClass:self.class]];
 	
@@ -38,6 +36,31 @@
 	{
 		self.appID = appID;
 		self.permissions = permissions;
+		
+		NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+		for (NSHTTPCookie *cookie in [storage cookies])
+		{
+			if ([cookie.domain rangeOfString:@"facebook.com"].location != NSNotFound)
+			{
+				[storage deleteCookie:cookie];
+			}
+		}
+		
+		WKWebViewConfiguration *config = [WKWebViewConfiguration new];
+		
+		if ([config respondsToSelector:@selector(setWebsiteDataStore:)])
+		{
+			config.websiteDataStore = WKWebsiteDataStore.nonPersistentDataStore;
+		}
+		
+		self.webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:config];
+		self.webView.navigationDelegate = self;
+		self.webView.configuration.websiteDataStore = WKWebsiteDataStore.nonPersistentDataStore;
+		
+		self.popover = [NSPopover new];
+		self.popover.delegate = self;
+		self.popover.contentViewController = self;
+		self.popover.behavior = NSPopoverBehaviorTransient;
 	}
 	
 	return self;
@@ -48,14 +71,12 @@
     [NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
-- (void) awakeFromNib
+- (void)awakeFromNib
 {
-	self.webView.navigationDelegate = self;
+	[super awakeFromNib];
 	
-	self.popover = [NSPopover new];
-	self.popover.delegate = self;
-	self.popover.contentViewController = self;
-	self.popover.behavior = NSPopoverBehaviorTransient;
+	self.webView.frame = self.view.bounds;
+	[self.view addSubview:self.webView];
 }
 
 - (void) showFromView:(NSView *)view completionHandler:(PhTokenRequestCompletionHandler)completion
@@ -122,24 +143,13 @@
 
 #pragma mark WKWebView delegate
 
-- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(null_unspecified WKNavigation *)navigation
-{
-    [self.progressIndicator startAnimation:self];
-	self.progressIndicator.hidden = NO;
-}
-
 - (void)webView:(WKWebView *)webView didFailNavigation:(null_unspecified WKNavigation *)navigation withError:(NSError *)error
 {
     [self showError:error];
-	[self.progressIndicator stopAnimation:self];
-	self.progressIndicator.hidden = YES;
 }
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(null_unspecified WKNavigation *)navigation
 {
-    [self.progressIndicator stopAnimation:self];
-	self.progressIndicator.hidden = YES;
-
 	NSString *url = webView.URL.absoluteString;
     NSLog(@"didFinishLoadForFrame: {%@}", [url stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
 

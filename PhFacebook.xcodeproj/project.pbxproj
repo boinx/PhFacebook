@@ -14,9 +14,9 @@
 		378DEC161228B9FD008061E4 /* PhWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 378DEC141228B9FD008061E4 /* PhWebViewController.m */; };
 		37FB6F89122ACEB6006339F3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 37FB6F87122ACEB6006339F3 /* Localizable.strings */; };
 		37FB6FEE122AD367006339F3 /* PhAuthenticationToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 37FB6FEC122AD367006339F3 /* PhAuthenticationToken.m */; };
-		37FB72D4122B5C7D006339F3 /* PhWebViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37FB72D3122B5C7D006339F3 /* PhWebViewController.xib */; };
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
+		B601A9D11D25578C00E029C0 /* PhWebViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B601A9D01D25578C00E029C0 /* PhWebViewController.xib */; };
 		B6D8863C1D23FFE5003B4A80 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6D8863A1D23FF2B003B4A80 /* WebKit.framework */; };
 /* End PBXBuildFile section */
 
@@ -41,9 +41,9 @@
 		37FB6FBD122AD1DA006339F3 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		37FB6FEB122AD367006339F3 /* PhAuthenticationToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhAuthenticationToken.h; path = classes/PhAuthenticationToken.h; sourceTree = "<group>"; };
 		37FB6FEC122AD367006339F3 /* PhAuthenticationToken.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PhAuthenticationToken.m; path = classes/PhAuthenticationToken.m; sourceTree = "<group>"; };
-		37FB72D3122B5C7D006339F3 /* PhWebViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PhWebViewController.xib; sourceTree = "<group>"; };
 		8DC2EF5A0486A6940098B216 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8DC2EF5B0486A6940098B216 /* PhFacebook.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PhFacebook.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B601A9D01D25578C00E029C0 /* PhWebViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PhWebViewController.xib; sourceTree = "<group>"; };
 		B6D8863A1D23FF2B003B4A80 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -83,9 +83,9 @@
 		089C1665FE841158C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B601A9D01D25578C00E029C0 /* PhWebViewController.xib */,
 				30A879E217BBA671006580CF /* error_message.css */,
 				3003932E17BA7833000912DE /* error_message.html */,
-				37FB72D3122B5C7D006339F3 /* PhWebViewController.xib */,
 				8DC2EF5A0486A6940098B216 /* Info.plist */,
 				089C1666FE841158C02AAC07 /* InfoPlist.strings */,
 				37FB6F87122ACEB6006339F3 /* Localizable.strings */,
@@ -200,8 +200,8 @@
 			files = (
 				8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */,
 				37FB6F89122ACEB6006339F3 /* Localizable.strings in Resources */,
-				37FB72D4122B5C7D006339F3 /* PhWebViewController.xib in Resources */,
 				3003932F17BA7833000912DE /* error_message.html in Resources */,
+				B601A9D11D25578C00E029C0 /* PhWebViewController.xib in Resources */,
 				30A879E317BBA671006580CF /* error_message.css in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

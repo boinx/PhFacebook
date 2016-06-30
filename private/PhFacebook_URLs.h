@@ -16,18 +16,11 @@
 
 #define kFBLoginSuccessURL @"https://www.facebook.com/connect/login_success.html"
 
-#define kFBUIServerURL @"http://www.facebook.com/connect/uiserver.php"
-
 #define kFBAccessToken @"access_token="
 #define kFBExpiresIn   @"expires_in="
 #define kFBErrorReason @"error_description="
 
-#define kFBGraphApiGetURL @"https://graph.facebook.com/" GRAPH_API_VERSION "/%@?access_token=%@"
-#define kFBGraphApiGetURLWithParams @"https://graph.facebook.com/" GRAPH_API_VERSION "/%@&access_token=%@"
-
-#define kFBGraphApiPostURL @"https://graph.facebook.com/" GRAPH_API_VERSION "/%@"
-
-#define kFBGraphApiFqlURL @"https://api.facebook.com/method/fql.query?query=%@&access_token=%@&format=json"
+#define kFBGraphURL @"https://graph.facebook.com/" GRAPH_API_VERSION "/%@"
 
 #define kFBURL @"http://facebook.com"
 #define kFBSecureURL @"https://facebook.com"

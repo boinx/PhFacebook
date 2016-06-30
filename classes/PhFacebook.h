@@ -20,6 +20,26 @@
 typedef void (^PhTokenRequestCompletionHandler)(PhAuthenticationToken *token, NSError *error);
 
 
+/*!
+ * @name PhRequestCompletionHandler
+ * @discussion Block invoked after executing a facebook request
+ * @param result:	If successfull contains the facebook result of the request
+ * @param error:	Any error that occured during the request
+ */
+
+typedef void (^PhRequestCompletionHandler)(NSDictionary *result, NSError *error);
+
+
+/*!
+ * @brief HTTP method to be used for a request
+ */
+
+typedef NS_ENUM(NSUInteger, PhRequestMethod) {
+    PhRequestMethodGET,
+    PhRequestMethodPOST,
+};
+
+
 @interface PhFacebook : NSObject
 
 /*! 
@@ -27,7 +47,10 @@ typedef void (^PhTokenRequestCompletionHandler)(PhAuthenticationToken *token, NS
  * @param appID: facebook application identifier
  * @param token: if available a restored authentication (will be cached in memory and used if not expired)
  */
-- (id)initWithApplicationID:(NSString *)appID existingToken:(PhAuthenticationToken *)token NS_DESIGNATED_INITIALIZER;
+
+- (id)initWithApplicationID:(NSString *)appID
+			  existingToken:(PhAuthenticationToken *)token;
+
 
 /*!
  * @discussion Use this method to load a token from facebook (e. g. login and request permissions)
@@ -35,33 +58,50 @@ typedef void (^PhTokenRequestCompletionHandler)(PhAuthenticationToken *token, NS
  * @param view:			view from which to open the popup
  * @param completion:	block invoked when either a token is available or an error occured
  */
+
 - (void)getAccessTokenForPermissions:(NSArray *)permissions
-						   fromView:(NSView *)host
+							fromView:(NSView *)host
 						  completion:(PhTokenRequestCompletionHandler)completion;
 
-/*
- * STILL NEEDS TO BE DONE
+
+/*!
+ * @brief The token which will be used for requests. You can store this in the keychain and reuse it in the \c initWithApplicationID:existingToken call
  */
-// request: the short version of the Facebook Graph API, e.g. "me/feed"
-// see http://developers.facebook.com/docs/api
-- (void) sendRequest: (NSString*) request;
-- (NSDictionary *)sendSynchronousRequest:(NSString *)request HTTPMethod:(NSString *)method params:(NSDictionary *)params;
+@property (atomic, strong, readonly) PhAuthenticationToken *authenticationToken;
 
-// Method is GET
-- (NSDictionary *)sendSynchronousRequest:(NSString *)request params:(NSDictionary *)params;
-- (NSDictionary *)sendSynchronousRequest:(NSString *)request;
 
-// query: the query to send to FQL API, e.g. "SELECT uid, sex, name from user WHERE uid = me()"
-// see http://developers.facebook.com/docs/reference/fql/
-- (void) sendFQLRequest: (NSString*) query;
-
-/**
- Sends an FQL query synchronously
- 
- @returns Dictionary containing the following keys: request (string), sender, result (as string), resultDict, raw (raw result data), Error
+/*!
+ * @brief clears the current active authentication token. Requires a call to \c getAccessTokenForPermissions:fromView:completion: afterwards
  */
-- (NSDictionary *)sendSynchronousFQLRequest:(NSString *)query;
+- (void)clearAuthenticationToken;
 
+
+/*!
+ * @discussion Use this method to make a simple GET request without parameters
+ * @param path:			path of the Graph API to query, see: http://developers.facebook.com/docs/api
+ * @param completion:	block invoked when the request finished
+ */
+
+- (void)sendRequest:(NSString *)path completionHandler:(PhRequestCompletionHandler)completion;
+
+
+/*!
+ * @discussion Use this method to make a simple GET request
+ * @param path:			path of the Graph API to query, see: http://developers.facebook.com/docs/api
+ * @param params:		parameter of the request
+ * @param completion:	block invoked when the request finished
+ */
+
+- (void)sendRequest:(NSString *)path parameters:(NSDictionary *)params completionHandler:(PhRequestCompletionHandler)completion;
+
+
+/*!
+ * @discussion Use this method to make a Graph API request
+ * @param path:			path of the Graph API to query, see: http://developers.facebook.com/docs/api
+ * @param params:		parameter of the request
+ * @param completion:	block invoked when the request finished
+ */
+
+- (void)sendRequest:(NSString *)path method:(PhRequestMethod)method parameters:(NSDictionary *)params completionHandler:(PhRequestCompletionHandler)completion;
 
 @end
-
