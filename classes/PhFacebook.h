@@ -104,4 +104,15 @@ typedef NS_ENUM(NSUInteger, PhRequestMethod) {
 
 - (void)sendRequest:(NSString *)path method:(PhRequestMethod)method parameters:(NSDictionary *)params completionHandler:(PhRequestCompletionHandler)completion;
 
+
+/*!
+ * @discussion Use this method to make a Graph API request with a custom token
+ * @param path:			path of the Graph API to query, see: http://developers.facebook.com/docs/api
+ * @param params:		parameter of the request
+ * @param authToken:	token to use for the request (nil for the default token)
+ * @param completion:	block invoked when the request finished
+ */
+
+- (void)sendRequest:(NSString *)path method:(PhRequestMethod)method parameters:(NSDictionary *)params authToken:(NSString *)authToken completionHandler:(PhRequestCompletionHandler)completion;
+
 @end

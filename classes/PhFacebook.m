@@ -52,7 +52,7 @@
 
 - (void)getAccessTokenForPermissions:(NSArray *)permissions fromView:(NSView *)host completion:(PhTokenRequestCompletionHandler)completion
 {
-	NSString *scope = [permissions componentsJoinedByString: @","];
+	NSString *scope = [permissions componentsJoinedByString:@","];
 	
 	if ([self.authenticationToken.permissions isCaseInsensitiveLike: scope])
 	{
@@ -67,11 +67,8 @@
 	[self clearAuthenticationToken];
 	
 	// Retrieve token from web page
-	if (self.webViewController == nil)
-	{
-		self.webViewController = [[PhWebViewController alloc] initWithApplicationID:self.appID permissions:scope];
-		[self.webViewController loadView];
-	}
+	self.webViewController = [[PhWebViewController alloc] initWithApplicationID:self.appID permissions:scope];
+	[self.webViewController loadView];
 	
 	[self.webViewController showFromView:host completionHandler:^(PhAuthenticationToken *token, NSError *error) {
 		self.authenticationToken = token;
@@ -94,12 +91,23 @@
 
 - (void)sendRequest:(NSString *)path method:(PhRequestMethod)method parameters:(NSDictionary *)params completionHandler:(PhRequestCompletionHandler)completion
 {
-	if (!self.authenticationToken || NSDate.date.timeIntervalSince1970 > self.authenticationToken.expiry.timeIntervalSince1970)
+	[self sendRequest:path method:method parameters:params authToken:nil completionHandler:completion];
+}
+
+- (void)sendRequest:(NSString *)path method:(PhRequestMethod)method parameters:(NSDictionary *)params authToken:(NSString *)authToken completionHandler:(PhRequestCompletionHandler)completion
+{
+	NSString *token = authToken;
+	if (!token)
 	{
-		[self clearAuthenticationToken];
+		if (!self.authenticationToken || (self.authenticationToken.expiry && NSDate.date.timeIntervalSince1970 > self.authenticationToken.expiry.timeIntervalSince1970))
+		{
+			[self clearAuthenticationToken];
+			
+			completion(nil, [NSError errorWithDomain:@"PhFacebook" code:500 userInfo:nil]);
+			return;
+		}
 		
-		completion(nil, [NSError errorWithDomain:@"PhFacebook" code:500 userInfo:nil]);
-		return;
+		token = self.authenticationToken.authenticationToken;
 	}
 	
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
@@ -129,7 +137,7 @@
 		{
 			parameters = [params mutableCopy];
 		}
-		parameters[@"access_token"] = self.authenticationToken.authenticationToken;
+		parameters[@"access_token"] = token;
 		
 		NSString *encodedParameters = @"";
 		for (NSString *key in parameters.allKeys)
