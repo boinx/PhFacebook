@@ -55,7 +55,6 @@
 		
 		self.webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:config];
 		self.webView.navigationDelegate = self;
-		self.webView.configuration.websiteDataStore = WKWebsiteDataStore.nonPersistentDataStore;
 		
 		self.popover = [NSPopover new];
 		self.popover.delegate = self;
