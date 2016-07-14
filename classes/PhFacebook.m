@@ -147,6 +147,7 @@
 			encodedParameters = [encodedParameters stringByAppendingFormat:@"%@=%@&", key, value];
 		}
 		encodedParameters = [encodedParameters substringToIndex:encodedParameters.length-1];
+		NSLog(@"encodedParameters: %@", encodedParameters);
 		
 		if (method == PhRequestMethodGET)
 		{
@@ -175,13 +176,34 @@
 		NSURLSessionDataTask *task = [self.urlSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
 			NSDictionary *responseDict = nil;
 			
-			if (data)
+			NSError *returnError = error;
+			
+			if (!returnError && data)
 			{
-				NSError *jsonError = nil;
-				responseDict = (NSDictionary *)[NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
+				responseDict = (NSDictionary *)[NSJSONSerialization JSONObjectWithData:data options:0 error:&returnError];
 			}
 			
-			completion(responseDict, error);
+			if (!returnError && responseDict[@"error"])
+			{
+				NSDictionary *errorDict = responseDict[@"error"];
+				
+				NSInteger code = -1;
+				if (errorDict[@"code"])
+				{
+					code = [errorDict[@"code"] integerValue];
+				}
+				
+				NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+				
+				if (errorDict[@"message"])
+				{
+					[userInfo setObject:errorDict[@"message"] forKey:NSLocalizedDescriptionKey];
+				}
+				
+				returnError = [NSError errorWithDomain:@"PhFacebookErrorDomain" code:code userInfo:userInfo];
+			}
+			
+			completion(responseDict, returnError);
 		}];
 		[task resume];
 	});
