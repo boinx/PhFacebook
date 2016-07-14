@@ -147,7 +147,6 @@
 			encodedParameters = [encodedParameters stringByAppendingFormat:@"%@=%@&", key, value];
 		}
 		encodedParameters = [encodedParameters substringToIndex:encodedParameters.length-1];
-		NSLog(@"encodedParameters: %@", encodedParameters);
 		
 		if (method == PhRequestMethodGET)
 		{
