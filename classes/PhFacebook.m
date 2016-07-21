@@ -142,7 +142,7 @@
 		NSString *encodedParameters = @"";
 		for (NSString *key in parameters.allKeys)
 		{
-			NSString *value = [parameters[key] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+			NSString *value = [self stringByAddingPercentEncodingForFormData:parameters[key]];
 			
 			encodedParameters = [encodedParameters stringByAppendingFormat:@"%@=%@&", key, value];
 		}
@@ -206,6 +206,18 @@
 		}];
 		[task resume];
 	});
+}
+
+- (NSString *)stringByAddingPercentEncodingForFormData:(NSString *)input
+{
+	NSString *unreserved = @"*-._";
+	NSMutableCharacterSet *allowed = [NSMutableCharacterSet
+									  alphanumericCharacterSet];
+	[allowed addCharactersInString:unreserved];
+	
+	NSString *encoded = [input stringByAddingPercentEncodingWithAllowedCharacters:allowed];
+
+	return encoded;
 }
 
 @end
