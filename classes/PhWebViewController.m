@@ -59,7 +59,7 @@
 		self.popover = [NSPopover new];
 		self.popover.delegate = self;
 		self.popover.contentViewController = self;
-		self.popover.behavior = NSPopoverBehaviorTransient;
+		self.popover.behavior = NSPopoverBehaviorSemitransient;
 	}
 	
 	return self;
