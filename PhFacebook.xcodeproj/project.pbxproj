@@ -9,16 +9,16 @@
 /* Begin PBXBuildFile section */
 		3003932F17BA7833000912DE /* error_message.html in Resources */ = {isa = PBXBuildFile; fileRef = 3003932E17BA7833000912DE /* error_message.html */; };
 		30A879E317BBA671006580CF /* error_message.css in Resources */ = {isa = PBXBuildFile; fileRef = 30A879E217BBA671006580CF /* error_message.css */; };
-		375CCD711225EED40064B3AE /* PhFacebook.h in Headers */ = {isa = PBXBuildFile; fileRef = 375CCD6F1225EED40064B3AE /* PhFacebook.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		375CCD721225EED40064B3AE /* PhFacebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 375CCD701225EED40064B3AE /* PhFacebook.m */; };
-		378DEC161228B9FD008061E4 /* PhWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 378DEC141228B9FD008061E4 /* PhWebViewController.m */; };
 		37FB6F89122ACEB6006339F3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 37FB6F87122ACEB6006339F3 /* Localizable.strings */; };
-		37FB6FEE122AD367006339F3 /* PhAuthenticationToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 37FB6FEC122AD367006339F3 /* PhAuthenticationToken.m */; };
 		8DC2EF530486A6940098B216 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
 		8DC2EF570486A6940098B216 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7B1FEA5585E11CA2CBB /* Cocoa.framework */; };
 		A80478211F3B70FD009E3E54 /* PhFacebookHeaders.h in Headers */ = {isa = PBXBuildFile; fileRef = A80478201F3B70E3009E3E54 /* PhFacebookHeaders.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A8FF983A1F3B56D1000C3A75 /* PhAuthenticationToken.h in Headers */ = {isa = PBXBuildFile; fileRef = 37FB6FEB122AD367006339F3 /* PhAuthenticationToken.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A8FF983B1F3B56FA000C3A75 /* PhWebViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 378DEC131228B9FD008061E4 /* PhWebViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A80478271F3C5806009E3E54 /* PhWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 378DEC141228B9FD008061E4 /* PhWebViewController.m */; };
+		A80478281F3C580D009E3E54 /* PhAuthenticationToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 37FB6FEC122AD367006339F3 /* PhAuthenticationToken.m */; };
+		A80478291F3C582E009E3E54 /* PhFacebook.h in Headers */ = {isa = PBXBuildFile; fileRef = 375CCD6F1225EED40064B3AE /* PhFacebook.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A804782A1F3C5832009E3E54 /* PhWebViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 378DEC131228B9FD008061E4 /* PhWebViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A804782B1F3C5835009E3E54 /* PhAuthenticationToken.h in Headers */ = {isa = PBXBuildFile; fileRef = 37FB6FEB122AD367006339F3 /* PhAuthenticationToken.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A804782D1F3C5AE5009E3E54 /* PhFacebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 375CCD701225EED40064B3AE /* PhFacebook.m */; };
 		B601A9D11D25578C00E029C0 /* PhWebViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B601A9D01D25578C00E029C0 /* PhWebViewController.xib */; };
 		B6D8863C1D23FFE5003B4A80 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6D8863A1D23FF2B003B4A80 /* WebKit.framework */; };
 /* End PBXBuildFile section */
@@ -137,9 +137,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A8FF983A1F3B56D1000C3A75 /* PhAuthenticationToken.h in Headers */,
-				A8FF983B1F3B56FA000C3A75 /* PhWebViewController.h in Headers */,
-				375CCD711225EED40064B3AE /* PhFacebook.h in Headers */,
+				A80478291F3C582E009E3E54 /* PhFacebook.h in Headers */,
+				A804782A1F3C5832009E3E54 /* PhWebViewController.h in Headers */,
+				A804782B1F3C5835009E3E54 /* PhAuthenticationToken.h in Headers */,
 				A80478211F3B70FD009E3E54 /* PhFacebookHeaders.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -221,9 +221,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				375CCD721225EED40064B3AE /* PhFacebook.m in Sources */,
-				378DEC161228B9FD008061E4 /* PhWebViewController.m in Sources */,
-				37FB6FEE122AD367006339F3 /* PhAuthenticationToken.m in Sources */,
+				A80478271F3C5806009E3E54 /* PhWebViewController.m in Sources */,
+				A80478281F3C580D009E3E54 /* PhAuthenticationToken.m in Sources */,
+				A804782D1F3C5AE5009E3E54 /* PhFacebook.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -259,6 +259,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
@@ -280,6 +281,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -300,6 +302,7 @@
 		1DEB91B208733DA50010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
@@ -330,6 +333,7 @@
 		1DEB91B308733DA50010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
