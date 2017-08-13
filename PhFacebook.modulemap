@@ -1,0 +1,8 @@
+framework module PhFacebook {
+	umbrella header "PhFacebookHeaders.h"
+	header "PhWebViewController.h"
+    header "PhAuthenticationToken.h"
+    header "PhFacebook.h"
+	export *
+	module * { export * }
+}

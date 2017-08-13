@@ -15,10 +15,12 @@
 		A80478211F3B70FD009E3E54 /* PhFacebookHeaders.h in Headers */ = {isa = PBXBuildFile; fileRef = A80478201F3B70E3009E3E54 /* PhFacebookHeaders.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A80478271F3C5806009E3E54 /* PhWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 378DEC141228B9FD008061E4 /* PhWebViewController.m */; };
 		A80478281F3C580D009E3E54 /* PhAuthenticationToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 37FB6FEC122AD367006339F3 /* PhAuthenticationToken.m */; };
-		A80478291F3C582E009E3E54 /* PhFacebook.h in Headers */ = {isa = PBXBuildFile; fileRef = 375CCD6F1225EED40064B3AE /* PhFacebook.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A804782A1F3C5832009E3E54 /* PhWebViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 378DEC131228B9FD008061E4 /* PhWebViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A804782B1F3C5835009E3E54 /* PhAuthenticationToken.h in Headers */ = {isa = PBXBuildFile; fileRef = 37FB6FEB122AD367006339F3 /* PhAuthenticationToken.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A804782D1F3C5AE5009E3E54 /* PhFacebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 375CCD701225EED40064B3AE /* PhFacebook.m */; };
+		A80478591F3DEC5E009E3E54 /* PhFacebook_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32DBCF5E0370ADEE00C91783 /* PhFacebook_Prefix.pch */; };
+		A804785A1F3DEC67009E3E54 /* PhFacebook_URLs.h in Headers */ = {isa = PBXBuildFile; fileRef = 37FB6D7612295681006339F3 /* PhFacebook_URLs.h */; };
+		A8D045751F3DF31200E95D0B /* PhFacebook.h in Headers */ = {isa = PBXBuildFile; fileRef = 375CCD6F1225EED40064B3AE /* PhFacebook.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A8D045761F3DF31600E95D0B /* PhAuthenticationToken.h in Headers */ = {isa = PBXBuildFile; fileRef = 37FB6FEB122AD367006339F3 /* PhAuthenticationToken.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A8D045771F3DF31900E95D0B /* PhWebViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 378DEC131228B9FD008061E4 /* PhWebViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B601A9D11D25578C00E029C0 /* PhWebViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B601A9D01D25578C00E029C0 /* PhWebViewController.xib */; };
 		B6D8863C1D23FFE5003B4A80 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B6D8863A1D23FF2B003B4A80 /* WebKit.framework */; };
 /* End PBXBuildFile section */
@@ -137,9 +139,11 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A80478291F3C582E009E3E54 /* PhFacebook.h in Headers */,
-				A804782A1F3C5832009E3E54 /* PhWebViewController.h in Headers */,
-				A804782B1F3C5835009E3E54 /* PhAuthenticationToken.h in Headers */,
+				A804785A1F3DEC67009E3E54 /* PhFacebook_URLs.h in Headers */,
+				A8D045771F3DF31900E95D0B /* PhWebViewController.h in Headers */,
+				A8D045761F3DF31600E95D0B /* PhAuthenticationToken.h in Headers */,
+				A8D045751F3DF31200E95D0B /* PhFacebook.h in Headers */,
+				A80478591F3DEC5E009E3E54 /* PhFacebook_Prefix.pch in Headers */,
 				A80478211F3B70FD009E3E54 /* PhFacebookHeaders.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -173,6 +177,11 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0830;
+				TargetAttributes = {
+					8DC2EF4F0486A6940098B216 = {
+						LastSwiftMigration = 0830;
+					};
+				};
 			};
 			buildConfigurationList = 1DEB91B108733DA50010E9CD /* Build configuration list for PBXProject "PhFacebook" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -260,19 +269,25 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = private/PhFacebook_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@rpath";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = PhFacebook.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.casgrain.${PRODUCT_NAME:rfc1034Identifier}";
 				PRODUCT_NAME = PhFacebook;
+				SWIFT_VERSION = 3.0;
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = framework;
 			};
 			name = Debug;
@@ -282,19 +297,25 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "";
 				FRAMEWORK_VERSION = A;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = private/PhFacebook_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@rpath";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = PhFacebook.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.casgrain.${PRODUCT_NAME:rfc1034Identifier}";
 				PRODUCT_NAME = PhFacebook;
+				SWIFT_VERSION = 3.0;
+				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = framework;
 			};
 			name = Release;
