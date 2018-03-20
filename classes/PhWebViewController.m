@@ -70,6 +70,16 @@
     [NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
+- (void)viewDidDisappear
+{
+    [super viewDidDisappear];
+    [self.popover close];
+    if (self.completionHandler)
+    {
+        self.completionHandler(nil, nil);
+    }
+}
+
 - (void)awakeFromNib
 {
 	[super awakeFromNib];
