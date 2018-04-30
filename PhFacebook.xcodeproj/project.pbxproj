@@ -179,7 +179,7 @@
 				LastUpgradeCheck = 0900;
 				TargetAttributes = {
 					8DC2EF4F0486A6940098B216 = {
-						LastSwiftMigration = 0830;
+						LastSwiftMigration = 0930;
 					};
 				};
 			};
@@ -286,7 +286,8 @@
 				MODULEMAP_FILE = PhFacebook.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.casgrain.${PRODUCT_NAME:rfc1034Identifier}";
 				PRODUCT_NAME = PhFacebook;
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = framework;
 			};
@@ -314,7 +315,8 @@
 				MODULEMAP_FILE = PhFacebook.modulemap;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.casgrain.${PRODUCT_NAME:rfc1034Identifier}";
 				PRODUCT_NAME = PhFacebook;
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
+				SWIFT_VERSION = 4.0;
 				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = framework;
 			};
