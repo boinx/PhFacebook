@@ -144,9 +144,8 @@
 		{
 			NSString *value = [self stringByAddingPercentEncodingForFormData:parameters[key]];
 			
-			encodedParameters = [encodedParameters stringByAppendingFormat:@"%@=%@&", key, value];
+			encodedParameters = [encodedParameters stringByAppendingFormat:@"%@%@=%@", (encodedParameters.length > 1 ? @"&" : @""), key, value];
 		}
-		encodedParameters = [encodedParameters substringToIndex:encodedParameters.length-1];
 		
 		if (method == PhRequestMethodGET)
 		{
