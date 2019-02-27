@@ -20,6 +20,12 @@
 #define kFBExpiresIn   @"expires_in="
 #define kFBErrorReason @"error_description="
 
+#define kFCode @"code="
+
+// NOTE: Importing Swift code into old ObjC framework PhFacebook is no fun at all. Change it there too.
+// BXAccountConstant.Facebook.redirectUrl
+#define kFRedirectUrl @"https://www.facebook.com/connect/login_success.html"
+
 #define kFBGraphURL @"https://graph.facebook.com/" GRAPH_API_VERSION "/%@"
 
 #define kFBURL @"http://facebook.com"
