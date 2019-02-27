@@ -14,6 +14,9 @@
 @property (nonatomic, strong, readwrite) NSDate *expiry;
 @property (nonatomic, strong, readwrite) NSString *permissions;
 
+@property (nonatomic, strong, readwrite) NSString *code;
+@property (nonatomic, strong, readwrite) NSString *redirectUrl;
+
 @end
 
 @implementation PhAuthenticationToken
@@ -52,6 +55,18 @@
         self.permissions = perms;
     }
 
+    return self;
+}
+
+- (id) initWithCode: (NSString*) code redirectUrl: (NSString*) redirectUrl permissions: (NSString*) perms
+{
+    if ((self = [super init]))
+    {
+        self.code = code;
+        self.redirectUrl = redirectUrl;
+        self.permissions = perms;
+    }
+    
     return self;
 }
 

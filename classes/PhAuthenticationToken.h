@@ -15,6 +15,10 @@
 @property (nonatomic, strong, readonly) NSDate *expiry;
 @property (nonatomic, strong, readonly) NSString *permissions;
 
+@property (nonatomic, strong, readonly) NSString *code;
+@property (nonatomic, strong, readonly) NSString *redirectUrl;
+
 - (instancetype)initWithToken:(NSString *)token secondsToExpiry:(NSTimeInterval)seconds permissions:(NSString *)perms;
+- (instancetype)initWithCode:(NSString *)code redirectUrl:(NSString *)redirectUrl permissions:(NSString *)perms;
 
 @end
