@@ -176,6 +176,10 @@
         NSString *tokenExpires = [self extractParameter: kFBExpiresIn fromURL: url];
         NSString *errorReason = [self extractParameter: kFBErrorReason fromURL: url];
         
+        NSString *code = [self extractParameter: kFCode fromURL: url];
+       
+        NSString *redirectUrl = kFRedirectUrl;
+        
         if (errorReason)
 		{
             NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -191,7 +195,14 @@
 		
 		if (self.completionHandler)
 		{
-			PhAuthenticationToken *token = [[PhAuthenticationToken alloc] initWithToken:accessToken secondsToExpiry:tokenExpires.floatValue permissions:self.permissions];
+            PhAuthenticationToken *token = nil;
+            
+            if (accessToken) {
+                token = [[PhAuthenticationToken alloc] initWithToken:accessToken secondsToExpiry:tokenExpires.floatValue permissions:self.permissions];
+            } else {
+                token = [[PhAuthenticationToken alloc] initWithCode:code redirectUrl:redirectUrl permissions:self.permissions];
+            }
+	
 			self.completionHandler(token, nil);
 			self.completionHandler = nil;
 		}
