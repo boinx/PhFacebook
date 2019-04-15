@@ -160,7 +160,7 @@
 - (void)webView:(WKWebView *)webView didFinishNavigation:(null_unspecified WKNavigation *)navigation
 {
 	NSString *url = webView.URL.absoluteString;
-    NSLog(@"didFinishLoadForFrame: {%@}", [url stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]);
+    NSLog(@"didFinishLoadForFrame: {%@}", [url stringByRemovingPercentEncoding]);
 
     NSString *urlWithoutSchema = [url substringFromIndex: [@"http://" length]];
     if ([url hasPrefix: @"https://"])
