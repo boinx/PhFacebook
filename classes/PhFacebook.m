@@ -50,33 +50,6 @@
     self.authenticationToken = nil;
 }
 
-- (void)getAccessTokenForPermissions:(NSArray *)permissions fromView:(NSView *)host completion:(PhTokenRequestCompletionHandler)completion
-{
-	NSString *scope = [permissions componentsJoinedByString:@","];
-	
-	if ([self.authenticationToken.permissions isCaseInsensitiveLike: scope])
-	{
-		// We already have a token for these permissions; check if it has expired or not
-		if (self.authenticationToken.expiry == nil || [[self.authenticationToken.expiry laterDate:NSDate.date] isEqual:self.authenticationToken.expiry])
-		{
-			completion(self.authenticationToken, nil);
-			return;
-		}
-	}
-	
-	[self clearAuthenticationToken];
-	
-	// Retrieve token from web page
-	self.webViewController = [[PhWebViewController alloc] initWithApplicationID:self.appID permissions:scope];
-	[self.webViewController loadView];
-	
-	[self.webViewController showFromView:host completionHandler:^(PhAuthenticationToken *token, NSError *error) {
-		self.authenticationToken = token;
-		completion(token, error);
-	}];
-}
-
-
 #pragma mark - Requests
 
 - (void)sendRequest:(NSString *)path completionHandler:(PhRequestCompletionHandler)completion

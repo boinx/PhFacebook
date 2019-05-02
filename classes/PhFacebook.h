@@ -52,19 +52,6 @@ typedef NS_ENUM(NSUInteger, PhRequestMethod) {
 - (id)initWithApplicationID:(NSString *)appID
 			  existingToken:(PhAuthenticationToken *)token;
 
-
-/*!
- * @discussion Use this method to load a token from facebook (e. g. login and request permissions)
- * @param permissions:	an array of required permissions, see: https://developers.facebook.com/docs/authentication/permissions
- * @param view:			view from which to open the popup
- * @param completion:	block invoked when either a token is available or an error occured
- */
-
-- (void)getAccessTokenForPermissions:(NSArray *)permissions
-							fromView:(NSView *)host
-						  completion:(PhTokenRequestCompletionHandler)completion;
-
-
 /*!
  * @brief The token which will be used for requests. You can store this in the keychain and reuse it in the \c initWithApplicationID:existingToken call
  */
@@ -72,7 +59,7 @@ typedef NS_ENUM(NSUInteger, PhRequestMethod) {
 
 
 /*!
- * @brief clears the current active authentication token. Requires a call to \c getAccessTokenForPermissions:fromView:completion: afterwards
+ * @brief clears the current active authentication token.
  */
 - (void)clearAuthenticationToken;
 
