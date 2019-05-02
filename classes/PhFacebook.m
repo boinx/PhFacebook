@@ -72,15 +72,30 @@
 	NSString *token = authToken;
 	if (!token)
 	{
-		if (!self.authenticationToken || (self.authenticationToken.expiry && NSDate.date.timeIntervalSince1970 > self.authenticationToken.expiry.timeIntervalSince1970))
-		{
-			[self clearAuthenticationToken];
-			
-			completion(nil, [NSError errorWithDomain:@"PhFacebook" code:500 userInfo:nil]);
-			return;
-		}
-		
-		token = self.authenticationToken.authenticationToken;
+        // NOTE: Some facebook accounts have expiry date and some don't.
+        // - The assumption that the expiry date exists is not safe.
+        // - The assumption that the expiry date is valid is not safe.
+        if (!self.authenticationToken)
+        {
+            // Warning: 510 is the accessTokenUnavailable BXAccount error code.
+            completion(nil, [NSError errorWithDomain:@"PhFacebook" code:510 userInfo:nil]);
+            return;
+        }
+        else
+        {
+            NSString *authenticationToken =  self.authenticationToken.authenticationToken;
+            if (authenticationToken)
+            {
+                token = self.authenticationToken.authenticationToken;
+            }
+            else
+            {
+                [self clearAuthenticationToken];
+                // Warning: 511 is the accessTokenValueUnavailable BXAccount error code.
+                completion(nil, [NSError errorWithDomain:@"PhFacebook" code:511 userInfo:nil]);
+                return;
+            }
+        }
 	}
 	
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
