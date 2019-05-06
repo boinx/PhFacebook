@@ -70,6 +70,7 @@
 - (void)sendRequest:(NSString *)path method:(PhRequestMethod)method parameters:(NSDictionary *)params authToken:(NSString *)authToken completionHandler:(PhRequestCompletionHandler)completion
 {
 	NSString *token = authToken;
+    
 	if (!token)
 	{
         // NOTE: Some facebook accounts have expiry date and some don't.
@@ -83,21 +84,24 @@
         }
         else
         {
-            NSString *authenticationToken =  self.authenticationToken.authenticationToken;
-            if (authenticationToken)
-            {
-                token = self.authenticationToken.authenticationToken;
-            }
-            else
-            {
-                [self clearAuthenticationToken];
-                // Warning: 511 is the accessTokenValueUnavailable BXAccount error code.
-                completion(nil, [NSError errorWithDomain:@"PhFacebook" code:511 userInfo:nil]);
-                return;
-            }
+            token = self.authenticationToken.authenticationToken;
         }
 	}
 	
+    /*
+        The token is allowed to be nil if the authenticationToken.code is not nil.
+        We will receive the proper accessToken and create a new PhAuthenticationToken object.
+        if both tokens are nil which shouldn't happen then the user would receive the following error message:
+        "An active access token must be used to query information about the current user."
+        This user scenario should never happen because of PhAuthenticationToken class structure and init.
+     */
+    
+    // if the token turns out garbage or an empty String:
+    // token = @"sdasdasdass";
+    // OR
+    // token = @"";
+    // Host app presents: "Account token expired." with renew option.
+
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
 		//Find which method to use for the request
 		NSString *httpMethod;
