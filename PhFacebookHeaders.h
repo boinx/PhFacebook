@@ -9,8 +9,8 @@
 #ifndef PhFacebookHeaders_h
 #define PhFacebookHeaders_h
 
-#import "PhFacebook.h"
-#import "PhWebViewController.h"
-#import "PhAuthenticationToken.h"
+#import <PhFacebook/PhFacebook.h>
+#import <PhFacebook/PhWebViewController.h>
+#import <PhFacebook/PhAuthenticationToken.h>
 
 #endif /* PhFacebookHeaders_h */

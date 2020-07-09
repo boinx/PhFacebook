@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "PhFacebook.h"
+#import <PhFacebook/PhFacebook.h>
 
 @class PhAuthenticationToken;
 
