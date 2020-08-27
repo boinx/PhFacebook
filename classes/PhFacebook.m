@@ -102,113 +102,166 @@
     // token = @"";
     // Host app presents: "Account token expired." with renew option.
 
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-		//Find which method to use for the request
-		NSString *httpMethod;
-		
-		switch (method) {
-			case PhRequestMethodGET:
-				httpMethod = @"GET";
-				break;
-				
-			case PhRequestMethodPOST:
-				httpMethod = @"POST";
-				break;
-				
-			default:
-				break;
-		}
-		
-		//Generate the URL to the request
-		NSString *fbURL = [NSString stringWithFormat:kFBGraphURL, path];
-		
-		
-		//Append the access token to the parameters
-		NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-		if (params)
-		{
-			parameters = [params mutableCopy];
-		}
-		parameters[@"access_token"] = token;
-		
-		NSString *encodedParameters = @"";
-		for (NSString *key in parameters.allKeys)
-		{
-			NSString *value = [self stringByAddingPercentEncodingForFormData:parameters[key]];
-			
-			encodedParameters = [encodedParameters stringByAppendingFormat:@"%@%@=%@", (encodedParameters.length > 1 ? @"&" : @""), key, value];
-		}
-		
-		if (method == PhRequestMethodGET)
-		{
-			//Append params
-			if ([path rangeOfString:@"?"].location != NSNotFound)
-			{
-				//What are they doing? Anyway, simply append the parameters
-				fbURL = [fbURL stringByAppendingFormat:@"&%@", encodedParameters];
-			}
-			else
-			{
-				fbURL = [fbURL stringByAppendingFormat:@"?%@", encodedParameters];
-			}
-		}
-		
-		NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:fbURL]];
-		request.HTTPMethod = httpMethod;
-		
-		if (method == PhRequestMethodPOST)
-		{
-			NSData *requestData = [encodedParameters dataUsingEncoding:NSUTF8StringEncoding];
-			request.HTTPBody = requestData;
-			[request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"content-type"];
-		}
-		
-		NSURLSessionDataTask *task = [self.urlSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-			NSDictionary *responseDict = nil;
-			
-			NSError *returnError = error;
-			
-			if (!returnError && data)
-			{
-				responseDict = (NSDictionary *)[NSJSONSerialization JSONObjectWithData:data options:0 error:&returnError];
-			}
-			
-			if (!returnError && responseDict[@"error"])
-			{
-				NSDictionary *errorDict = responseDict[@"error"];
-				
-				NSInteger code = -1;
-				if (errorDict[@"code"])
-				{
-					code = [errorDict[@"code"] integerValue];
-				}
-				
-				NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
-				
-				if (errorDict[@"message"])
-				{
-					[userInfo setObject:errorDict[@"message"] forKey:NSLocalizedDescriptionKey];
-				}
-				
-				returnError = [NSError errorWithDomain:@"PhFacebookErrorDomain" code:code userInfo:userInfo];
-			}
-			
-			completion(responseDict, returnError);
-		}];
-		[task resume];
-	});
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        //Find which method to use for the request
+        NSString *httpMethod;
+        
+        switch (method) {
+            case PhRequestMethodGET:
+                httpMethod = @"GET";
+                break;
+                
+            case PhRequestMethodPOST:
+                httpMethod = @"POST";
+                break;
+                
+            default:
+                break;
+        }
+        
+        //Generate the URL to the request
+        NSString *fbURL = [NSString stringWithFormat:kFBGraphURL, path];
+        
+        
+        //Append the access token to the parameters
+        NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
+        if (params)
+        {
+            parameters = [params mutableCopy];
+        }
+        parameters[@"access_token"] = token;
+        
+        NSString *encodedParameters = @"";
+        for (NSString *key in parameters.allKeys)
+        {
+            NSString *data = parameters[key];
+            if ([data isKindOfClass:NSString.class])
+            {
+                // Used in most cases since we append strings as parameters.
+                NSString *value = [self stringByAddingPercentEncodingForFormData:parameters[key]];
+                encodedParameters = [encodedParameters stringByAppendingFormat:@"%@%@=%@", (encodedParameters.length > 1 ? @"&" : @""), key, value];
+            }
+            else if (([data isKindOfClass:NSArray.class]))
+            {
+                // FB consumes JSON batch requests still as a single string.
+                // This code is not currently used, but could prove usefull.
+                NSArray *dataArray = (NSArray*)data;
+                
+                for (NSDictionary *dataDict in dataArray)
+                {
+                    if ([dataDict isKindOfClass:NSDictionary.class])
+                    {
+                        for (NSString *key in dataDict.allKeys)
+                        {
+                            NSString *dataString = dataDict[key];
+                            if ([dataString isKindOfClass:NSString.class])
+                            {
+                                NSString *value = [self stringByAddingPercentEncodingForFormData:dataString];
+                                encodedParameters = [encodedParameters stringByAppendingFormat:@"%@%@=%@", (encodedParameters.length > 1 ? @"&" : @""), key, value];
+                            }
+                            else
+                            {
+                                NSLog(@"\n%@ failed silently for object: %@\n\n" ,self, dataString);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        NSLog(@"\n%@ failed silently for object: %@\n\n" ,self, dataDict);
+                    }
+                }
+                
+            }
+            else
+            {
+               NSLog(@"\n%@ is using an unknown data type for: %@\n\n" ,self, data);
+            }
+        }
+        
+
+        if (method == PhRequestMethodGET)
+        {
+            //Append params
+            if ([path rangeOfString:@"?"].location != NSNotFound)
+            {
+                //What are they doing? Anyway, simply append the parameters
+                fbURL = [fbURL stringByAppendingFormat:@"&%@", encodedParameters];
+            }
+            else
+            {
+                fbURL = [fbURL stringByAppendingFormat:@"?%@", encodedParameters];
+            }
+        }
+        
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:fbURL]];
+        request.HTTPMethod = httpMethod;
+        
+        if (method == PhRequestMethodPOST)
+        {
+            NSData *requestData = [encodedParameters dataUsingEncoding:NSUTF8StringEncoding];
+            request.HTTPBody = requestData;
+            [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"content-type"];
+        }
+        
+        NSURLSessionDataTask *task = [self.urlSession dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            NSDictionary *responseDict = nil;
+           
+            NSError *returnError = error;
+            
+            if (!returnError && data)
+            {
+                responseDict = (NSDictionary *)[NSJSONSerialization JSONObjectWithData:data options:0 error:&returnError];
+            }
+            NSLog(@"\n\n%@ RESPONDED WITH:\nResponse: %@\n\n",self,responseDict);
+            if ([responseDict isKindOfClass:NSDictionary.class])
+            {
+                // Non batch request response.
+                if (!returnError && responseDict[@"error"])
+                {
+                    NSDictionary *errorDict = responseDict[@"error"];
+                    
+                    NSInteger code = -1;
+                    if (errorDict[@"code"])
+                    {
+                        code = [errorDict[@"code"] integerValue];
+                    }
+                    
+                    NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+                    
+                    if (errorDict[@"message"])
+                    {
+                        [userInfo setObject:errorDict[@"message"] forKey:NSLocalizedDescriptionKey];
+                    }
+                    
+                    returnError = [NSError errorWithDomain:@"PhFacebookErrorDomain" code:code userInfo:userInfo];
+                }
+                completion(responseDict, returnError);
+            }
+            else if ([responseDict isKindOfClass: NSArray.class])
+            {
+                // Batch request response.
+                // Each request can have a own error. The response is wrapper inside a dictionary in order to conform
+                // to the completion handler return type.
+                NSArray *responseArray = (NSArray*)responseDict;
+                completion(@{ @"batch": responseArray}, returnError);
+            }
+    
+        }];
+        [task resume];
+    });
 }
+
 
 - (NSString *)stringByAddingPercentEncodingForFormData:(NSString *)input
 {
-	NSString *unreserved = @"*-._";
-	NSMutableCharacterSet *allowed = [NSMutableCharacterSet
-									  alphanumericCharacterSet];
-	[allowed addCharactersInString:unreserved];
-	
-	NSString *encoded = [input stringByAddingPercentEncodingWithAllowedCharacters:allowed];
+    NSString *unreserved = @"*-._";
+    NSMutableCharacterSet *allowed = [NSMutableCharacterSet
+                                      alphanumericCharacterSet];
+    [allowed addCharactersInString:unreserved];
+    
+    NSString *encoded = [input stringByAddingPercentEncodingWithAllowedCharacters:allowed];
 
-	return encoded;
+    return encoded;
 }
 
 @end
