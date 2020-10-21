@@ -212,7 +212,7 @@
             {
                 responseDict = (NSDictionary *)[NSJSONSerialization JSONObjectWithData:data options:0 error:&returnError];
             }
-            NSLog(@"\n\n%@ RESPONDED WITH:\nResponse: %@\n\n",self,responseDict);
+
             if ([responseDict isKindOfClass:NSDictionary.class])
             {
                 // Non batch request response.
