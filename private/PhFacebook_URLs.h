@@ -8,7 +8,7 @@
 //  Copyright 2010 Philippe Casgrain. All rights reserved.
 //
 
-#define GRAPH_API_VERSION "v8.0"
+#define GRAPH_API_VERSION "v10.0"
 
 #define kFBAuthorizeURL @"https://www.facebook.com/dialog/oauth?client_id=%@&redirect_uri=%@&type=user_agent&display=popup"
 
